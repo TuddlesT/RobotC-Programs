@@ -12,11 +12,24 @@ void moveDown();
 bool floorCollision();
 bool brickCollision();
 void placeShape();
-	word gridMovement[20];
-	word gridPlacement[20];
-	bool shapePlaced = true;
+bool lineCompleteTest(int row);
+void lineComplete(int row);
+unsigned short gridMovement[20];
+unsigned short gridPlacement[20];
+unsigned short completedLine[1];
+bool shapePlaced = true;
 task main()
 {
+	completedLine[0]=SetBit(completedLine[0], 0);
+	completedLine[0]=SetBit(completedLine[0], 1);
+	completedLine[0]=SetBit(completedLine[0], 2);
+	completedLine[0]=SetBit(completedLine[0], 3);
+	completedLine[0]=SetBit(completedLine[0], 4);
+	completedLine[0]=SetBit(completedLine[0], 5);
+	completedLine[0]=SetBit(completedLine[0], 6);
+	completedLine[0]=SetBit(completedLine[0], 7);
+	completedLine[0]=SetBit(completedLine[0], 8);
+	completedLine[0]=SetBit(completedLine[0], 9);
 	while(true)
 	{
 		if (shapePlaced == true)
@@ -25,14 +38,14 @@ task main()
 			shapePlaced = false;
 		}
 		drawRect(0,0,102,52);
-							//if ((getButtonPress(buttonLeft) == 1) && canMoveLeft())
-							//{
-							//	moveLeft();
-							//}
-							//else if (getButtonPress(buttonRight) == 1 && canMoveRight())
-							//{
-							//	moveRight();
-							//}
+		//if ((getButtonPress(buttonLeft) == 1) && canMoveLeft())
+		//{
+		//	moveLeft();
+		//}
+		//else if (getButtonPress(buttonRight) == 1 && canMoveRight())
+		//{
+		//	moveRight();
+		//}
 		if(nNxtButtonPressed == 2 && canMoveRight())
 		{
 			moveLeft();
@@ -42,7 +55,7 @@ task main()
 			moveRight();
 		}
 		drawGrid1();
-		sleep(500);
+		sleep(150);
 		eraseDisplay();
 		if ((floorCollision() == true) && (brickCollision() == true))
 		{
@@ -53,6 +66,10 @@ task main()
 			placeShape();
 			shapePlaced = true;
 		}
+			if (lineCompleteTest(19) == true)
+			{
+				break;
+			}
 	}
 }
 
@@ -180,4 +197,21 @@ bool brickCollision()
 		}
 	}
 	return true;
+}
+
+bool lineCompleteTest(int row)
+{
+	if (gridPlacement[row] == completedLine[0])
+	{
+		return true;
+	}
+	return false;
+}
+
+void lineComplete(int row)
+{
+	for (int column; column < 10; ++column)
+	{
+		gridPlacement[row] = ClrBit(gridPlacement[row], column);
+	}
 }
