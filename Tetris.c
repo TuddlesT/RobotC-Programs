@@ -2,11 +2,20 @@
 #define SetBit(n, i) ((n) | (1 << (i)))
 #define ClrBit(n, i) ((n) & ~(1 << (i)))
 //void addSquareGrid1(int gridx, int gridy);
+
+int speed = 1;
+
 void moveLeft();
 void moveRight();
 bool canMoveLeft();
 bool canMoveRight();
 void selectSquare();
+void selectLine();
+void selectT();
+void selectLRight();
+void selectLLeft();
+void selectZRight();
+void selectZLeft();
 void drawGrid1();
 void moveDown();
 bool floorCollision();
@@ -18,44 +27,68 @@ unsigned short gridMovement[20];
 unsigned short gridPlacement[20];
 unsigned short completedLine[1];
 bool shapePlaced = true;
+bool breakCode = false;
+int currentShape;
 task main()
 {
-	completedLine[0]=SetBit(completedLine[0], 0);
-	completedLine[0]=SetBit(completedLine[0], 1);
-	completedLine[0]=SetBit(completedLine[0], 2);
-	completedLine[0]=SetBit(completedLine[0], 3);
-	completedLine[0]=SetBit(completedLine[0], 4);
-	completedLine[0]=SetBit(completedLine[0], 5);
-	completedLine[0]=SetBit(completedLine[0], 6);
-	completedLine[0]=SetBit(completedLine[0], 7);
-	completedLine[0]=SetBit(completedLine[0], 8);
-	completedLine[0]=SetBit(completedLine[0], 9);
+	for (int i; i < 10; ++i)
+	{
+		completedLine[0]=SetBit(completedLine[0], i);
+	}
 	while(true)
 	{
 		if (shapePlaced == true)
 		{
-			selectSquare();
+			currentShape = abs(rand()%6);
+			if (currentShape == 0)
+			{
+				selectSquare();
+			}
+			else if (currentShape == 1)
+			{
+				selectLine();
+			}
+			else if (currentShape == 2)
+			{
+				selectT();
+			}
+			else if (currentShape == 3)
+			{
+				selectLRight();
+			}
+			else if (currentShape == 4)
+			{
+				selectLLeft();
+			}
+			else if (currentShape == 5)
+			{
+				selectZLeft();
+			}
+			else if (currentShape == 6)
+			{
+				selectZRight();
+			}
 			shapePlaced = false;
 		}
 		drawRect(0,0,102,52);
-		//if ((getButtonPress(buttonLeft) == 1) && canMoveLeft())
-		//{
-		//	moveLeft();
-		//}
-		//else if (getButtonPress(buttonRight) == 1 && canMoveRight())
-		//{
-		//	moveRight();
-		//}
-		if(nNxtButtonPressed == 2 && canMoveRight())
+		if ((getButtonPress(buttonUp) == 1) && canMoveRight())
 		{
 			moveLeft();
 		}
-		else if(nNxtButtonPressed == 1 && canMoveLeft())
+		else if (getButtonPress(buttonDown) == 1 && canMoveLeft())
 		{
 			moveRight();
 		}
+		//if(nNxtButtonPressed == 2 && canMoveRight())
+		//{
+		//	moveLeft();
+		//}
+		//else if(nNxtButtonPressed == 1 && canMoveLeft())
+		//{
+		//	moveRight();
+		//}
 		drawGrid1();
-		sleep(150);
+		sleep(speed);
 		eraseDisplay();
 		if ((floorCollision() == true) && (brickCollision() == true))
 		{
@@ -66,10 +99,17 @@ task main()
 			placeShape();
 			shapePlaced = true;
 		}
-			if (lineCompleteTest(19) == true)
+		for (int row; row < 20; ++row)
+		{
+			if (lineCompleteTest(row) == true)
 			{
-				break;
+				breakCode = true;
 			}
+		}
+		if (breakCode == true)
+		{
+			break;
+		}
 	}
 }
 
@@ -125,6 +165,54 @@ void selectSquare()
 	gridMovement[0] = SetBit(gridMovement[0], 5);
 	gridMovement[1] = SetBit(gridMovement[1], 4);
 	gridMovement[1] = SetBit(gridMovement[1], 5);
+}
+
+void selectLine()
+{
+	gridMovement[0] = SetBit(gridMovement[0], 3);
+	gridMovement[0] = SetBit(gridMovement[0], 4);
+	gridMovement[0] = SetBit(gridMovement[0], 5);
+	gridMovement[0] = SetBit(gridMovement[0], 6);
+}
+
+void selectT()
+{
+	gridMovement[0] = SetBit(gridMovement[0], 4);
+	gridMovement[1] = SetBit(gridMovement[1], 3);
+	gridMovement[1] = SetBit(gridMovement[1], 4);
+	gridMovement[1] = SetBit(gridMovement[1], 5);
+}
+
+void selectLRight()
+{
+	gridMovement[1] = SetBit(gridMovement[1], 3);
+	gridMovement[0] = SetBit(gridMovement[0], 3);
+	gridMovement[0] = SetBit(gridMovement[0], 4);
+	gridMovement[0] = SetBit(gridMovement[0], 5);
+}
+
+void selectLLeft()
+{
+	gridMovement[1] = SetBit(gridMovement[1], 5);
+	gridMovement[0] = SetBit(gridMovement[0], 3);
+	gridMovement[0] = SetBit(gridMovement[0], 4);
+	gridMovement[0] = SetBit(gridMovement[0], 5);
+}
+
+void selectZLeft()
+{
+	gridMovement[0] = SetBit(gridMovement[0], 3);
+	gridMovement[0] = SetBit(gridMovement[0], 4);
+	gridMovement[1] = SetBit(gridMovement[1], 4);
+	gridMovement[1] = SetBit(gridMovement[1], 5);
+}
+
+void selectZRight()
+{
+	gridMovement[0] = SetBit(gridMovement[0], 5);
+	gridMovement[0] = SetBit(gridMovement[0], 4);
+	gridMovement[1] = SetBit(gridMovement[0], 4);
+	gridMovement[1] = SetBit(gridMovement[0], 3);
 }
 
 void drawGrid1()
@@ -201,7 +289,7 @@ bool brickCollision()
 
 bool lineCompleteTest(int row)
 {
-	if (gridPlacement[row] == completedLine[0])
+	if (gridPlacement[row] == 1023)
 	{
 		return true;
 	}
