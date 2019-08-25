@@ -3,7 +3,7 @@
 #define ClrBit(n, i) ((n) & ~(1 << (i)))
 //void addSquareGrid1(int gridx, int gridy);
 
-int speed = 1;
+int speed = 400;
 
 void moveLeft();
 void moveRight();
@@ -29,66 +29,75 @@ unsigned short completedLine[1];
 bool shapePlaced = true;
 bool breakCode = false;
 int currentShape;
+
 task main()
 {
-	for (int i; i < 10; ++i)
-	{
-		completedLine[0]=SetBit(completedLine[0], i);
-	}
 	while(true)
 	{
+		for (int i = 0; i < 10; ++i)
+		{
+			completedLine[0] = SetBit(completedLine[0], i);
+		}
 		if (shapePlaced == true)
 		{
-			currentShape = abs(rand()%6);
-			if (currentShape == 0)
+			//currentShape = abs(rand()%6);
+			//if (currentShape == 0)
 			{
 				selectSquare();
 			}
-			else if (currentShape == 1)
-			{
-				selectLine();
-			}
-			else if (currentShape == 2)
-			{
-				selectT();
-			}
-			else if (currentShape == 3)
-			{
-				selectLRight();
-			}
-			else if (currentShape == 4)
-			{
-				selectLLeft();
-			}
-			else if (currentShape == 5)
-			{
-				selectZLeft();
-			}
-			else if (currentShape == 6)
-			{
-				selectZRight();
-			}
+			//else if (currentShape == 1)
+			//{
+			//	selectLine();
+			//}
+			//else if (currentShape == 2)
+			//{
+			//	selectT();
+			//}
+			//else if (currentShape == 3)
+			//{
+			//	selectLRight();
+			//}
+			//else if (currentShape == 4)
+			//{
+			//	selectLLeft();
+			//}
+			//else if (currentShape == 5)
+			//{
+			//	selectZLeft();
+			//}
+			//else if (currentShape == 6)
+			//{
+			//	selectZRight();
+			//}
 			shapePlaced = false;
 		}
 		drawRect(0,0,102,52);
-		if ((getButtonPress(buttonUp) == 1) && canMoveRight())
-		{
-			moveLeft();
-		}
-		else if (getButtonPress(buttonDown) == 1 && canMoveLeft())
-		{
-			moveRight();
-		}
-		//if(nNxtButtonPressed == 2 && canMoveRight())
+		//if ((getButtonPress(buttonUp) == 1) && canMoveRight())
 		//{
 		//	moveLeft();
 		//}
-		//else if(nNxtButtonPressed == 1 && canMoveLeft())
+		//else if (getButtonPress(buttonDown) == 1 && canMoveLeft())
 		//{
 		//	moveRight();
 		//}
+		if(nNxtButtonPressed == 2 && canMoveRight())
+		{
+			moveLeft();
+		}
+		else if(nNxtButtonPressed == 1 && canMoveLeft())
+		{
+			moveRight();
+		}
 		drawGrid1();
-		sleep(speed);
+		if (nNxtButtonPressed == 3)
+		//if (getButtonPress(buttonEnter) == 1)
+		{
+			sleep(speed/4);
+		}
+		else
+		{
+			sleep(speed);
+		}
 		eraseDisplay();
 		if ((floorCollision() == true) && (brickCollision() == true))
 		{
@@ -99,16 +108,12 @@ task main()
 			placeShape();
 			shapePlaced = true;
 		}
-		for (int row; row < 20; ++row)
+		for (int i = 0; i < 20; ++i)
 		{
-			if (lineCompleteTest(row) == true)
+			if (lineCompleteTest(i) == true)
 			{
-				breakCode = true;
+				lineComplete(i);
 			}
-		}
-		if (breakCode == true)
-		{
-			break;
 		}
 	}
 }
@@ -289,7 +294,7 @@ bool brickCollision()
 
 bool lineCompleteTest(int row)
 {
-	if (gridPlacement[row] == 1023)
+	if (gridPlacement[row] == completedLine[0])
 	{
 		return true;
 	}
@@ -298,8 +303,12 @@ bool lineCompleteTest(int row)
 
 void lineComplete(int row)
 {
-	for (int column; column < 10; ++column)
+	for (int i = row; i > 0; --i)
 	{
-		gridPlacement[row] = ClrBit(gridPlacement[row], column);
+		for (int column = 0; column < 10; ++column)
+		{
+			gridPlacement[i] = ClrBit(gridPlacement[i], column);
+		}
+		gridPlacement[i] = gridPlacement[i - 1];
 	}
 }
