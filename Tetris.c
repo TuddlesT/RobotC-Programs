@@ -4,7 +4,7 @@
 //void addSquareGrid1(int gridx, int gridy);
 
 int speed = 400;
-
+int tileSize = 5;
 
 void moveLeft();
 void moveRight();
@@ -77,37 +77,36 @@ task main()
 			}
 			shapePlaced = false;
 		}
-		drawRect(0,0,102,52);
-		//if ((getButtonPress(buttonUp) == 1) && canMoveRight())
-		//{
-		//	moveLeft();
-		//  direction = 1;
-		//}
-		//else if (getButtonPress(buttonDown) == 1 && canMoveLeft())
-		//{
-		//	moveRight();
-		//  direction = -1;
-		//}
-		// else if (getButtonPress(buttonEnter) == 1 && canRotate())
-		//{
-		//	rotate(currentShape);
-		//}
-		if(nNxtButtonPressed == 2 && canMoveRight())
+		drawRect(0,0,tileSize*20+2,tileSize*10+2);
+		if ((getButtonPress(buttonUp) == 1) && canMoveRight())
 		{
 			moveLeft();
+		  direction = 1;
 		}
-		else if(nNxtButtonPressed == 1 && canMoveLeft())
+		else if (getButtonPress(buttonDown) == 1 && canMoveLeft())
 		{
 			moveRight();
+		  direction = -1;
 		}
-		else if(nNxtButtonPressed == 3 && canRotate(currentShape))
+		 else if (getButtonPress(buttonEnter) == 1 && canRotate(currentShape))
 		{
 			rotate(currentShape);
 		}
+		//if(nNxtButtonPressed == 2 && canMoveRight())
+		//{
+		//	moveLeft();
+		//}
+		//else if(nNxtButtonPressed == 1 && canMoveLeft())
+		//{
+		//	moveRight();
+		//}
+		//else if(nNxtButtonPressed == 3 && canRotate(currentShape))
+		//{
+		//	rotate(currentShape);
+		//}
 		drawGrid1();
-
-		//if (getButtonPress(buttonRight) == 1)
-		if (nNxtButtonPressed == 3)
+			//if (nNxtButtonPressed == 3)
+		if (getButtonPress(buttonRight) == 1)
 		{
 			sleep(speed);
 		}
@@ -135,12 +134,6 @@ task main()
 		}
 	}
 }
-
-//void addSquareGrid1(int gridx, int gridy)
-//{
-//	fillRect(gridx*5, gridy*5, gridx*5+5, gridy*5+5);
-//	gridMovement[gridy] = SetBit(gridMovement[gridy], gridx);
-//}
 
 bool canMoveLeft()
 {
@@ -277,11 +270,11 @@ void drawGrid1()
 		{
 			if (GetBit(gridMovement[i], j) == 1)
 			{
-				fillRect(i*5+1, j*5+1, i*5+5, j*5+5);
+				fillRect(i*tileSize+1, j*tileSize+1, i*tileSize+tileSize, j*tileSize+tileSize);
 			}
 			if (GetBit(gridPlacement[i], j) == 1)
 			{
-				fillRect(i*5+1, j*5+1, i*5+5, j*5+5);
+				fillRect(i*tileSize+1, j*tileSize+1, i*tileSize+tileSize, j*tileSize+tileSize);
 			}
 		}
 	}
