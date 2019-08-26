@@ -5,6 +5,7 @@
 
 int speed = 400;
 
+
 void moveLeft();
 void moveRight();
 bool canMoveLeft();
@@ -27,58 +28,69 @@ unsigned short gridMovement[20];
 unsigned short gridPlacement[20];
 unsigned short completedLine[1];
 bool shapePlaced = true;
-bool breakCode = false;
 int currentShape;
+bool hasMoved = false;
+int rotationX;
+int rotationY;
+int currentRotation;
+bool canRotate(int shape);
+void rotate(int shape);
+int direction = 0;
 
 task main()
 {
 	while(true)
 	{
+		direction = 0;
+		hasMoved = false;
 		for (int i = 0; i < 10; ++i)
 		{
 			completedLine[0] = SetBit(completedLine[0], i);
 		}
 		if (shapePlaced == true)
 		{
-			//currentShape = abs(rand()%6);
-			//if (currentShape == 0)
+			currentRotation = 0;
+			currentShape = abs(rand()%6);
+			switch(currentShape)
 			{
-				selectSquare();
+				case 0:
+					selectSquare();
+					break;
+				case 1:
+					selectLine();
+					break;
+				case 2:
+					selectT();
+					break;
+				case 3:
+					selectLRight();
+					break;
+				case 4:
+					selectLLeft();
+					break;
+				case 5:
+					selectZLeft();
+					break;
+				case 6:
+					selectZRight();
+					break;
 			}
-			//else if (currentShape == 1)
-			//{
-			//	selectLine();
-			//}
-			//else if (currentShape == 2)
-			//{
-			//	selectT();
-			//}
-			//else if (currentShape == 3)
-			//{
-			//	selectLRight();
-			//}
-			//else if (currentShape == 4)
-			//{
-			//	selectLLeft();
-			//}
-			//else if (currentShape == 5)
-			//{
-			//	selectZLeft();
-			//}
-			//else if (currentShape == 6)
-			//{
-			//	selectZRight();
-			//}
 			shapePlaced = false;
 		}
 		drawRect(0,0,102,52);
 		//if ((getButtonPress(buttonUp) == 1) && canMoveRight())
 		//{
 		//	moveLeft();
+		//  direction = 1;
 		//}
 		//else if (getButtonPress(buttonDown) == 1 && canMoveLeft())
 		//{
 		//	moveRight();
+		//  direction = -1;
+		//}
+		// else if (getButtonPress(buttonEnter) == 1 && canRotate())
+		//{
+		//	rotate(currentShape);
 		//}
 		if(nNxtButtonPressed == 2 && canMoveRight())
 		{
@@ -88,18 +100,24 @@ task main()
 		{
 			moveRight();
 		}
-		drawGrid1();
-		if (nNxtButtonPressed == 3)
-		//if (getButtonPress(buttonEnter) == 1)
+		else if(nNxtButtonPressed == 3 && canRotate(currentShape))
 		{
-			sleep(speed/4);
+			rotate(currentShape);
+		}
+		drawGrid1();
+
+		//if (getButtonPress(buttonRight) == 1)
+		if (nNxtButtonPressed == 3)
+		{
+			sleep(speed);
 		}
 		else
 		{
 			sleep(speed);
 		}
+		rotationX = rotationX + direction;
 		eraseDisplay();
-		if ((floorCollision() == true) && (brickCollision() == true))
+		if ((floorCollision() == true) && (brickCollision() == true) && hasMoved == false)
 		{
 			moveDown();
 		}
@@ -153,6 +171,11 @@ void moveLeft()
 	for (int i =0; i < 20; ++i)
 	{
 		gridMovement[i] = gridMovement[i] << 1;
+		eraseDisplay();
+		drawGrid1();
+		drawRect(0,0,102,52);
+		hasMoved = true;
+		direction = -1;
 	}
 }
 
@@ -161,6 +184,11 @@ void moveRight()
 	for (int i =0; i < 20; ++i)
 	{
 		gridMovement[i] = gridMovement[i] >> 1;
+		eraseDisplay();
+		drawGrid1();
+		drawRect(0,0,102,52);
+		hasMoved = true;
+		direction = 1;
 	}
 }
 
@@ -170,6 +198,9 @@ void selectSquare()
 	gridMovement[0] = SetBit(gridMovement[0], 5);
 	gridMovement[1] = SetBit(gridMovement[1], 4);
 	gridMovement[1] = SetBit(gridMovement[1], 5);
+	rotationX = 4;
+	rotationY = 0;
+	currentRotation = 0;
 }
 
 void selectLine()
@@ -178,6 +209,9 @@ void selectLine()
 	gridMovement[0] = SetBit(gridMovement[0], 4);
 	gridMovement[0] = SetBit(gridMovement[0], 5);
 	gridMovement[0] = SetBit(gridMovement[0], 6);
+	rotationX = 5;
+	rotationY = 0;
+	currentRotation = 0;
 }
 
 void selectT()
@@ -186,6 +220,9 @@ void selectT()
 	gridMovement[1] = SetBit(gridMovement[1], 3);
 	gridMovement[1] = SetBit(gridMovement[1], 4);
 	gridMovement[1] = SetBit(gridMovement[1], 5);
+	rotationX = 4;
+	rotationY = 1;
+	currentRotation = 0;
 }
 
 void selectLRight()
@@ -194,6 +231,9 @@ void selectLRight()
 	gridMovement[0] = SetBit(gridMovement[0], 3);
 	gridMovement[0] = SetBit(gridMovement[0], 4);
 	gridMovement[0] = SetBit(gridMovement[0], 5);
+	rotationX = 4;
+	rotationY = 0;
+	currentRotation = 0;
 }
 
 void selectLLeft()
@@ -202,6 +242,9 @@ void selectLLeft()
 	gridMovement[0] = SetBit(gridMovement[0], 3);
 	gridMovement[0] = SetBit(gridMovement[0], 4);
 	gridMovement[0] = SetBit(gridMovement[0], 5);
+	rotationX = 4;
+	rotationY = 0;
+	currentRotation = 0;
 }
 
 void selectZLeft()
@@ -210,14 +253,20 @@ void selectZLeft()
 	gridMovement[0] = SetBit(gridMovement[0], 4);
 	gridMovement[1] = SetBit(gridMovement[1], 4);
 	gridMovement[1] = SetBit(gridMovement[1], 5);
+	rotationX = 4;
+	rotationY = 0;
+	currentRotation = 0;
 }
 
 void selectZRight()
 {
 	gridMovement[0] = SetBit(gridMovement[0], 5);
 	gridMovement[0] = SetBit(gridMovement[0], 4);
-	gridMovement[1] = SetBit(gridMovement[0], 4);
-	gridMovement[1] = SetBit(gridMovement[0], 3);
+	gridMovement[1] = SetBit(gridMovement[1], 4);
+	gridMovement[1] = SetBit(gridMovement[1], 3);
+	rotationX = 4;
+	rotationY = 1;
+	currentRotation = 0;
 }
 
 void drawGrid1()
@@ -228,11 +277,11 @@ void drawGrid1()
 		{
 			if (GetBit(gridMovement[i], j) == 1)
 			{
-				fillRect(i*5+1, j*5+1, i*5+6, j*5+6);
+				fillRect(i*5+1, j*5+1, i*5+5, j*5+5);
 			}
 			if (GetBit(gridPlacement[i], j) == 1)
 			{
-				fillRect(i*5+1, j*5+1, i*5+6, j*5+6);
+				fillRect(i*5+1, j*5+1, i*5+5, j*5+5);
 			}
 		}
 	}
@@ -245,6 +294,7 @@ void moveDown()
 		gridMovement[i+1] = gridMovement[i];
 	}
 	gridMovement[0] = 0;
+	rotationY = rotationY + 1;
 }
 
 bool floorCollision()
@@ -310,5 +360,396 @@ void lineComplete(int row)
 			gridPlacement[i] = ClrBit(gridPlacement[i], column);
 		}
 		gridPlacement[i] = gridPlacement[i - 1];
+	}
+}
+
+bool canRotate(int shape)
+{
+	if (shape == 1) // Line
+	{
+		if (currentRotation == 0)
+		{
+			if ((GetBit(gridPlacement[rotationY - 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY - 2], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX)) == 1))
+			{
+				return false;
+			}
+		}
+		if (currentRotation == 1)
+		{
+			if ((GetBit(gridPlacement[rotationY], (rotationX + 1)) == 1) || (GetBit(gridPlacement[rotationY], (rotationX - 1)) == 1) || (GetBit(gridPlacement[rotationY], (rotationX - 2)) == 1))
+			{
+				return false;
+			}
+		}
+	}
+	if (shape == 2) // T-Shape
+	{
+		if (currentRotation == 0)
+		{
+			if ((GetBit(gridPlacement[rotationY + 1], (rotationX)) == 1))
+			{
+				return false;
+			}
+		}
+		if (currentRotation == 1)
+		{
+			if ((GetBit(gridPlacement[rotationY], (rotationX + 1)) == 1))
+			{
+				return false;
+			}
+		}
+		if (currentRotation == 2)
+		{
+			if ((GetBit(gridPlacement[rotationY + 1], (rotationX)) == 1))
+			{
+				return false;
+			}
+		}
+		if (currentRotation == 3)
+		{
+			if ((GetBit(gridPlacement[rotationY], (rotationX - 1)) == 1))
+			{
+				return false;
+			}
+		}
+		if (currentShape == 3) // Right-Facing L Shape
+		{
+			if (currentRotation == 0)
+			{
+				if ((GetBit(gridPlacement[rotationY - 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX + 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 1)
+			{
+				if ((GetBit(gridPlacement[rotationY], (rotationX - 1)) == 1) || (GetBit(gridPlacement[rotationY], (rotationX + 1)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX + 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 2)
+			{
+				if ((GetBit(gridPlacement[rotationY + 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX - 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 3)
+			{
+				if ((GetBit(gridPlacement[rotationY], (rotationX + 1)) == 1) || (GetBit(gridPlacement[rotationY], (rotationX - 1)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX - 1)) == 1))
+				{
+					return false;
+				}
+			}
+		}
+		if (currentShape == 4) // Left-Facing L Shape
+		{
+			if (currentRotation == 0)
+			{
+				if ((GetBit(gridPlacement[rotationY + 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX + 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 1)
+			{
+				if ((GetBit(gridPlacement[rotationY], (rotationX + 1)) == 1) || (GetBit(gridPlacement[rotationY], (rotationX - 1)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX - 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 2)
+			{
+				if ((GetBit(gridPlacement[rotationY - 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX - 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 3)
+			{
+				if ((GetBit(gridPlacement[rotationY], (rotationX - 1)) == 1) || (GetBit(gridPlacement[rotationY], (rotationX + 1)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX + 1)) == 1))
+				{
+					return false;
+				}
+			}
+		}
+		if (currentShape == 5)
+		{
+			if (currentRotation == 0)
+			{
+				if ((GetBit(gridPlacement[rotationY], (rotationX + 1)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX + 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 1)
+			{
+				if ((GetBit(gridPlacement[rotationY - 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX - 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 2)
+			{
+				if ((GetBit(gridPlacement[rotationY], (rotationX - 1)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX - 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 3)
+			{
+				if ((GetBit(gridPlacement[rotationY + 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX + 1)) == 1))
+				{
+					return false;
+				}
+			}
+		}
+		if (currentShape == 6)
+		{
+			if (currentRotation == 0)
+			{
+				if ((GetBit(gridPlacement[rotationY + 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX - 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 1)
+			{
+				if ((GetBit(gridPlacement[rotationY], (rotationX + 1)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX - 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 2)
+			{
+				if ((GetBit(gridPlacement[rotationY - 1], (rotationX)) == 1) || (GetBit(gridPlacement[rotationY + 1], (rotationX + 1)) == 1))
+				{
+					return false;
+				}
+			}
+			if (currentRotation == 3)
+			{
+				if ((GetBit(gridPlacement[rotationY], (rotationX - 1)) == 1) || (GetBit(gridPlacement[rotationY - 1], (rotationX + 1)) == 1))
+				{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+
+void rotate(int shape)
+{
+	hasMoved = true;
+	for (int row = 0; row < 20; ++row)
+	{
+		for (int column = 0; column < 10; ++column)
+		{
+			gridMovement[row] = ClrBit(gridMovement[row], column);
+		}
+	}
+	if (shape == 0)
+	{
+		gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+		gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+		gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+		gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX + 1));
+	}
+	if (shape == 1) // Line
+	{
+		if (currentRotation == 0)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY - 2] = SetBit(gridMovement[rotationY - 2], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			currentRotation = 1;
+		}
+		else if (currentRotation == 1)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 2));
+			currentRotation = 0;
+		}
+	}
+	if (shape == 2) // T-Shape
+	{
+		if (currentRotation == 0)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			currentRotation = 1;
+		}
+		else if (currentRotation == 1)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			currentRotation = 2;
+		}
+		else if (currentRotation == 2)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			currentRotation = 3;
+		}
+		else if (currentRotation == 3)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			currentRotation = 0;
+		}
+	}
+	if (currentShape == 3) // Right-Facing L Shape
+	{
+		if (currentRotation == 0)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[(rotationY - 1)], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[(rotationY + 1)], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[(rotationY - 1)], (rotationX + 1));
+			currentRotation = 1;
+		}
+		else if (currentRotation == 1)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX + 1));
+			currentRotation = 2;
+		}
+		else if (currentRotation == 2)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX - 1));
+			currentRotation = 3;
+		}
+		else if (currentRotation == 3)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX - 1));
+			currentRotation = 0;
+		}
+	}
+	if (currentShape == 4) // Left-Facing L Shape
+	{
+		if (currentRotation == 0)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX + 1));
+			currentRotation = 1;
+		}
+		else if (currentRotation == 1)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX - 1));
+			currentRotation = 2;
+		}
+		else if (currentRotation == 2)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX - 1));
+			currentRotation = 3;
+		}
+		else if (currentRotation == 3)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX + 1));
+			currentRotation = 0;
+		}
+	}
+	if (currentShape == 5)
+	{
+		if (currentRotation == 0)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX + 1));
+			currentRotation = 1;
+		}
+		else if (currentRotation == 1)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX - 1));
+			currentRotation = 2;
+		}
+		else if (currentRotation == 2)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX - 1));
+			currentRotation = 3;
+		}
+		else if (currentRotation == 3)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX + 1));
+			currentRotation = 0;
+		}
+	}
+	if (currentShape == 6)
+	{
+		if (currentRotation == 0)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX - 1));
+			currentRotation = 1;
+		}
+		else if (currentRotation == 1)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX - 1));
+			currentRotation = 2;
+		}
+		else if (currentRotation == 2)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX + 1));
+			gridMovement[rotationY + 1] = SetBit(gridMovement[rotationY + 1], (rotationX + 1));
+			currentRotation = 3;
+		}
+		else if (currentRotation == 3)
+		{
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX));
+			gridMovement[rotationY] = SetBit(gridMovement[rotationY], (rotationX - 1));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX));
+			gridMovement[rotationY - 1] = SetBit(gridMovement[rotationY - 1], (rotationX + 1));
+			currentRotation = 0;
+		}
 	}
 }
